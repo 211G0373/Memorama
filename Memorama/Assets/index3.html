@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"  name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Memorama Animado</title>
+  <style>
+    @font-face {
+  font-family: 'MiFuentePersonalizada';
+  src: url(fonts/Minecraft.ttf) format('truetype');
+}
+
+    html {
+      font-family: 'MiFuentePersonalizada', sans-serif;
+      background-image: url(Dirt-background.png);
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      cursor: url(dpfull.png), auto;
+    }
+    body {
+      height: 100dvh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .game {
+      height: 60vh;
+      flex-direction: column;
+      align-content: center;
+    justify-items: center;
+    }
+    .board {
+      background-image: url(stone2.png);
+      background-size: 25%;
+      
+      box-shadow: 20px 20px 20px #0005;
+      display: flex;
+        justify-content: center;
+      flex-wrap: wrap;
+      width: 88vw;
+        height: 88vw;
+        max-width: 72vh;
+        max-height: 72vh;
+
+    }
+    .Score {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: auto;
+      padding: 0;
+      height: 10vh;
+      width: 88vw;
+      max-width: 72vh;
+
+    }
+    .infoPlayer {
+      display: none;
+
+      background-color: rgba(0, 0, 0, 0.295);
+
+      text-align: center;
+      margin: auto;
+ 
+      padding: 0;
+      padding-top: 30dvh;
+
+      height: 60dvh;
+      width: 100vw;
+      z-index: 2;
+
+    }
+  
+    .infoPlayer input {
+      font-family: 'MiFuentePersonalizada', sans-serif;
+      color: white;
+      font-size: 3vh;
+      text-align: center;
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.466);
+      border: none;
+      padding: 10px;
+      border-radius: none ;
+      width: 50%;
+    }
+h1 {
+  font-family: 'MiFuentePersonalizada', sans-serif;
+
+      color: white;
+      font-size: 4vh;
+      margin: 0;
+    }
+    h2 {
+  font-family: 'MiFuentePersonalizada', sans-serif;
+      color: white;
+      font-size: 3vh;
+      margin: 0;
+      text-align: center;
+      font-weight: normal;      
+    }
+    .card {
+      background-image: url(stone.jpg);
+      background-size: cover;
+
+      margin: 0;
+        height: 22vw;
+        max-width: 18vh;
+        width: 22vw;
+        max-height: 18vh;
+      background-color: #888;
+      box-shadow: 0 0 10px #0005;
+      transform: scale(0); 
+      opacity: 0;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+
+    button {
+      font-family: 'MiFuentePersonalizada', sans-serif;
+      color: white;
+      font-size: 3vh;
+      text-align: center;
+      margin-top: 20px;
+      background-color: rgba(167, 167, 167, 0.438);
+      border: none;
+      padding: 10px;
+      width: 50%;
+
+      border-radius: none ;
+    }
+    button:hover {
+      cursor: url(dpfull.png), auto;
+      filter: brightness(2);
+    }
+
+    header {
+      
+      align-content: center;
+    justify-items: center;
+
+        margin: 0px;
+        height: 10vh;
+      text-align: center;
+      background-image: url(15160745-screenshot_l.jpg);
+      width: 100%;
+    }
+    .card:hover {
+      cursor: url(dpfull.png), auto;
+      filter: brightness(0.8);
+    }
+
+    .card.placed {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .card.show {
+      background-image: url(imgs/01.png);
+      background-size: cover;
+    }
+    #message {
+      font-family: 'MiFuentePersonalizada', sans-serif;
+      color: white;
+      font-size: 3vh;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+    <header>
+        <h1>MemoryCraft</h1>
+    </header>
+
+   
+
+      <div class="infoPlayer" id="player-name-section">
+        <h2>Introduce tu nombre:</h2>
+        <input type="text" id="player-name" placeholder="Tu nombre">
+        <button id="start-button">Iniciar</button>
+
+        <h2 id="game-status" class="status" hidden>Esperando a otro jugador...</h2>
+
+      </div>
+
+
+    <div class="game" id="game-section">
+      <div class="Score">
+        <h2>
+          <span id="player1Name" id="puntage1">Jugador 1</span>
+          <span >: 0</span>
+        </h2>
+        <h2>
+          <span id="player2Name" id="puntage2">Jugador 2</span>
+          <span >: 0</span>
+        </h2>
+        
+      </div>
+      <div class="board" id="board"></div>
+    <h2 id="message">Turno de jugador1</h2>
+
+    </div>
+
+
+
+  <script>
+    const playerNameInput = document.getElementById("player-name");
+    const startButton = document.getElementById("start-button");
+    const playerNameSection = document.getElementById("player-name-section");
+    const gameSection = document.getElementById("game-section");
+    const gameStatus = document.getElementById("game-status");
+    const turnMessage = document.getElementById("turn-message");
+    const board = document.getElementById("board");
+    const cells = document.querySelectorAll(".cell");
+    const player1 = document.getElementById("player1Name");
+    const player2 = document.getElementById("player2Name");
+    const player1score = document.getElementById("puntage1");
+    const player2score = document.getElementById("puntage2");
+    const turno = document.getElementById("currentPlayer");
+
+    function createCard(index) {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      setTimeout(() => {
+        card.classList.add('placed');
+        const audio2 = new Audio('roto3.mp3'); 
+      audio2.play();
+      }, 200 * index); // retardo progresivo para animación en cascada
+      return card;
+    }
+
+    async function flipCard(card) {
+      card.classList.toggle('show');
+      card.style.backgroundImage = `url(imgs/rompiendo.gif)`;
+      
+      const audio = new Audio('rompiendo3.mp3'); // Asegúrate de que el archivo esté en la misma carpeta o pon la ruta correcta
+      audio.play();
+    
+
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
+      audio.pause();
+      const audio2 = new Audio('roto3.mp3'); 
+      audio2.play();
+      card.style.backgroundImage = `url(imgs/01.png)`;
+      card.classList.toggle('show');
+    }
+
+
+    function startGame() {
+      board.innerHTML = '';
+      const totalCards = 16; // 8 pares, puedes cambiar este número
+      for (let i = 0; i < totalCards; i++) {
+        const card = createCard(i);
+        board.appendChild(card);
+      }
+    }
+
+    board.addEventListener('click', (event) => {
+      if (event.target.classList.contains('card')) {
+       
+        flipCard(event.target);
+        // Cambia la imagen después de 1 segundo
+    }});
+
+
+    // Iniciar el juego automáticamente al cargar
+    window.onload = startGame;
+  </script>
+
+</body>
+</html>
