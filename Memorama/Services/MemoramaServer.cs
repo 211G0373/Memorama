@@ -76,7 +76,7 @@ namespace Memorama.Services
                             break;
                         default:
 
-                            if (context.Request.RawUrl.StartsWith("/memorama/assets/imgs"))
+                            if (context.Request.RawUrl.StartsWith("/memorama/assets"))
                             {
                                 string filePath = context.Request.RawUrl.Replace("/memorama/",""); // elimina el primer '/'
 
@@ -226,10 +226,32 @@ namespace Memorama.Services
                                 else
                                 {
                                     //long polling, mientras no sea mi turno
-                                    while (sesion.LastTurno == lasturn && sesion.Turno ==turn )
+
+
+                                    for (int i = 0; i < 10; i++)
                                     {
-                                        Thread.Sleep(500);
+                                        if (sesion.LastTurno == lasturn && sesion.Turno == turn)
+                                        {
+                                            
+                                            Thread.Sleep(500);
+                                            if (i == 9)
+                                            {
+                                                sesion.Estado = 4;
+                                            }
+                                            
+
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
+                                        
+
                                     }
+
+
+
+
 
                                     var gato = new MemoramaDTO() //Prepar dto para enviarlo a ambos
                                     {
@@ -245,6 +267,11 @@ namespace Memorama.Services
                                         IdSesion = sesion.Id
                                     };
 
+                                    if (sesion.Estado == 3 || sesion.Estado == 4)
+                                    {
+                                        sesiones.Remove(sesion);
+                                    }
+
                                     byte[] dato = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(gato));
 
                                     context.Response.ContentLength64 = dato.Length;
@@ -252,7 +279,7 @@ namespace Memorama.Services
                                     context.Response.OutputStream.Write(dato);
                                     context.Response.StatusCode = 200; //ok
 
-
+                                    
                                 }
                             }
 

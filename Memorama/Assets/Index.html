@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"  name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Memorama Animado</title>
+  <style>
+      @font-face {
+          font-family: 'MiFuentePersonalizada';
+          src: url(/memorama/assets/fonts/Minecraft.ttf) format('truetype');
+      }
+
+
+
+
+
+      html {
+          font-family: 'MiFuentePersonalizada', sans-serif;
+          background-image: url(/memorama/assets/Dirt-background.png);
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
+          cursor: url(/memorama/assets/dpfull.png), auto;
+      }
+    body {
+      height: 100dvh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .game {
+      height: 60vh;
+      flex-direction: column;
+      align-content: center;
+    justify-items: center;
+    }
+      .board {
+          background-image: url(/memorama/assets/stone2.png);
+          background-size: 25%;
+          box-shadow: 20px 20px 20px #0005;
+          display: flex;
+          
+          flex-wrap: wrap;
+          width: 88vw;
+          height: 88vw;
+          max-width: 72vh;
+          max-height: 72vh;
+      }
+    .Score {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: auto;
+      padding: 0;
+      height: 10vh;
+      width: 88vw;
+      max-width: 72vh;
+
+    }
+    .infoPlayer {
+      
+      background-color: rgba(0, 0, 0, 0.295);
+
+      text-align: center;
+      margin: auto;
+ 
+      padding: 0;
+      padding-top: 30dvh;
+
+      height: 60dvh;
+      z-index: 2;
+
+    }
+  
+    .infoPlayer input {
+      font-family: 'MiFuentePersonalizada', sans-serif;
+      color: white;
+      font-size: 3vh;
+      text-align: center;
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.466);
+      border: none;
+      padding: 10px;
+      width: 50%;
+    }
+h1 {
+  font-family: 'MiFuentePersonalizada', sans-serif;
+
+      color: white;
+      font-size: 4vh;
+      margin: 0;
+    }
+    h2 {
+  font-family: 'MiFuentePersonalizada', sans-serif;
+      color: white;
+      font-size: 3vh;
+      margin: 0;
+      text-align: center;
+      font-weight: normal;      
+    }
+      .card {
+          background-image: url(/memorama/assets/stone.jpg);
+          background-size: cover;
+          margin: 0;
+          height: 22vw;
+          max-width: 18vh;
+          width: 22vw;
+          max-height: 18vh;
+          background-color: #888;
+          box-shadow: 0 0 10px #0005;
+          transform: scale(0);
+          border: none;
+          opacity: 0;
+          transition: transform 0.4s ease, opacity 0.4s ease;
+      }
+
+      #start-button {
+          font-family: 'MiFuentePersonalizada', sans-serif;
+          color: white;
+          font-size: 3vh;
+          text-align: center;
+          margin-top: 20px;
+          background-color: rgba(167, 167, 167, 0.438);
+          border: none;
+          padding: 10px;
+          width: 50%;
+      }
+      #start-button:hover {
+          cursor: url(/memorama/assets/dpfull.png), auto;
+          filter: brightness(2);
+      }
+
+      #restart-button {
+          font-family: 'MiFuentePersonalizada', sans-serif;
+          color: white;
+          font-size: 3vh;
+          text-align: center;
+          margin-top: 20px;
+          background-color: rgba(167, 167, 167, 0.438);
+          border: none;
+          padding: 10px;
+          width: 50%;
+      }
+
+          #restart-button:hover {
+              cursor: url(/memorama/assets/dpfull.png), auto;
+              filter: brightness(2);
+          }
+
+
+      header {
+          align-content: center;
+          justify-items: center;
+          margin: 0px;
+          height: 10vh;
+          text-align: center;
+          background-image: url(/memorama/assets/15160745-screenshot_l.jpg);
+          width: 100%;
+      }
+      .card:hover {
+          cursor: url(/memorama/assets/dpfull.png), auto;
+          filter: brightness(0.8);
+      }
+
+    .card.placed {
+      transform: scale(1);
+      opacity: 1;
+    }
+      .card.show {
+          background-image: url(/memorama/assets/imgs/1.png);
+          background-size: cover;
+      }
+    #message {
+      font-family: 'MiFuentePersonalizada', sans-serif;
+      color: white;
+      font-size: 3vh;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .bloqueado .card{
+        backdrop-filter: brightness(0.5);
+    }
+      .bloqueado .card:hover {
+          cursor: none;
+      }
+  </style>
+</head>
+<body>
+
+    <header>
+        <h1>MemoryCraft</h1>
+    </header>
+
+   
+
+      <div class="infoPlayer" id="player-name-section">
+        <h2>Introduce tu nombre:</h2>
+        <input type="text" id="player-name" placeholder="Tu nombre">
+        <button id="start-button">Iniciar</button>
+
+        <h2 id="game-status" class="status" hidden>Esperando a otro jugador...</h2>
+
+      </div>
+
+
+
+
+
+    <div class="game" id="game-section" hidden>
+      <div class="Score">
+        <h2>
+          <span id="player1Name" >Jugador 1</span>
+          <span id="puntage1" >: 0</span>
+        </h2>
+        <h2>
+          <span id="player2Name">Jugador 2</span>
+          <span id="puntage2">: 0</span>
+        </h2>
+        
+      </div>
+      <div class="board" id="board">
+         
+      </div>
+      <h2>
+          <span>Turno de </span>
+          <span id="currentPlayer"></span>
+      </h2>
+
+    </div>
+
+    <div class="infoPlayer" id="game-results" hidden>
+        <h2 id="game-result"></h2>
+        <button id="restart-button">Volver a jugar</button>
+
+        <h2 id="game-status" class="status" hidden>Esperando a otro jugador...</h2>
+
+    </div>
+
+
+
+  <script>
+    const playerNameInput = document.getElementById("player-name");
+    const startButton = document.getElementById("start-button");
+      const restartButton = document.getElementById("restart-button");
+
+      const playerNameSection = document.getElementById("player-name-section");
+    const gameSection = document.getElementById("game-section");
+    const gameStatus = document.getElementById("game-status");
+    const turnMessage = document.getElementById("turn-message");
+    const board = document.getElementById("board");
+      const gameResults = document.getElementById("game-results");
+      const gameResuil = document.getElementById("game-result");
+
+    
+    
+    const player1 = document.getElementById("player1Name");
+    const player2 = document.getElementById("player2Name");
+    const player1score = document.getElementById("puntage1");
+    const player2score = document.getElementById("puntage2");
+    const turno = document.getElementById("currentPlayer");
+    let nombre, idSesion, lastCard;
+
+    //animacion inicial
+    function createCard(index) {
+        const card = document.createElement('button');
+        card.dataset.pos = index;
+        card.classList.add('card');
+        card.classList.add('placed'); 
+        const audio2 = new Audio('/memorama/assets/roto3.mp3');
+        audio2.play();
+      
+      return card;
+    }
+    //voltear carta
+      async function flipCard(nmcard, image) {
+           let card = document.querySelector(`.card[data-pos="${nmcard}"]`);
+          //const card = cartas[nmcard];
+         card.classList.toggle('show');
+        card.style.backgroundImage = `url(/memorama/assets/imgs/rompiendo.gif)`;
+      
+        const audio = new Audio('/memorama/assets/rompiendo3.mp3'); // Asegúrate de que el archivo esté en la misma carpeta o pon la ruta correcta
+      audio.play();
+    
+
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
+      audio.pause();
+        const audio2 = new Audio('/memorama/assets/roto3.mp3'); 
+      audio2.play();
+          card.style.backgroundImage = `url(/memorama/assets/imgs/` + image + `.png)`;
+      card.classList.toggle('show');
+      }
+
+      //unflip cards
+      async function unflipCard(nmcard) {
+          let card = document.querySelector(`.card[data-pos="${nmcard}"]`);
+          //const card = cartas[nmcard];
+          card.classList.toggle('show');
+          card.style.backgroundImage = `url(/memorama/assets/imgs/rompiendo.gif)`;
+
+          const audio = new Audio('/memorama/assets/rompiendo3.mp3'); // Asegúrate de que el archivo esté en la misma carpeta o pon la ruta correcta
+          audio.play();
+
+
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
+          audio.pause();
+          const audio2 = new Audio('/memorama/assets/roto3.mp3');
+          audio2.play();
+          card.style.backgroundImage = `url(/memorama/assets/stone.jpg)`;
+          card.classList.toggle('show');
+      }
+
+
+    //iniciar juego
+      async function startGame() {
+          board.innerHTML = '';
+          const totalCards = 16;
+          const delayEntreCartas = 100; // ms
+        
+
+          for (let i = 0; i < totalCards; i++) {
+              const card = createCard(i);
+              board.appendChild(card);
+              console.log(i);
+
+            
+              // Simulamos animación en cascada
+              await new Promise(resolve => setTimeout(resolve, delayEntreCartas));
+
+          }
+          cartas = document.querySelectorAll(".card");
+          // Esperar a que termine la animación de la última carta
+          await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+    //Dar click en la carta
+    board.addEventListener('click', (event) => {
+        if (event.target.classList.contains('card') && !board.classList.contains("bloqueado")) {
+
+
+
+
+
+
+            Jugada(event.target); // Llamar a la función Jugada con la carta clickeada
+        // Cambia la imagen después de 1 segundo
+        }
+    });
+
+      //inicio
+
+      async function start() {
+          console.log("falllandooo");
+          if (playerNameInput.value) {
+              nombre = playerNameInput.value;
+              //crear el json
+              let json = { Nombre: nombre };
+
+              gameStatus.hidden = false;
+              playerNameInput.disabled = true;
+
+              let response = await fetch("/memorama/quierojugar", {
+                  method: "POST",
+                  body: JSON.stringify(json),
+                  headers: {
+                      "content-type": "application/json"
+                  }
+              }); //Hacer un fetch, el servidor hará long polling
+
+              if (response.ok) {
+
+                  let juego = await response.json();
+                  playerNameSection.hidden = true;
+                  gameResults.hidden = true;
+                  gameSection.hidden = false;
+
+                  idSesion = juego.IdSesion;
+
+                  player1.innerText = juego.Jugador1;
+                  player2.innerText = juego.Jugador2;
+                  turno.innerText = juego.Turno;
+
+                  if (juego.Jugador1 == nombre) {
+                      player1.style.color = "darkgreen";
+                  }
+                  else {
+                      player2.style.color = "darkgreen";
+                  }
+                  await startGame();
+                  console.log("iniciado");
+                  if (juego.Turno == nombre) {
+                      board.classList.remove("bloqueado");
+                  }
+                  else { //no es mi turno
+                      board.classList.add("bloqueado");
+                      esperar();
+                  }
+
+
+              }
+
+
+          }
+          else {
+              alert("Escribe el nombre del usuario para comenzar.");
+          }
+      }
+      startButton.addEventListener("click", start);
+      restartButton.addEventListener("click", start);
+
+
+
+      //jugada
+      async function Jugada(carta) {
+          let json = { IdSesion: idSesion, PosCarta: parseInt(carta.dataset.pos), Nombre: nombre };
+
+          let response = await fetch("/memorama/jugada/", {
+              method: "POST",
+              body: JSON.stringify(json),
+              headers: {
+                  "content-type": "application/json"
+              }
+          });
+          if (response.ok) {
+              let juego = await response.json();
+              player1score.innerText = juego.PuntageJugador1;
+              player2score.innerText = juego.PuntageJugador2;
+              turno.innerText = juego.Turno;
+              if (juego.Turno == nombre) {
+                  console.log("Es mi turno");
+              }
+              else {
+                  console.log("ya no");
+
+              }
+              flipCard(juego.PosCartaRevelada, juego.CartaRevelada);
+
+
+
+              if (juego.Estado == 3) {
+                  console.log("esperando fin");
+                  await new Promise(resolve => setTimeout(resolve, 5000));
+
+
+                  finJuego(juego);
+                  console.log("esperando fin");
+
+
+
+              }
+
+              if (juego.Turno == nombre) {
+
+
+
+
+
+              }
+              else { //no es mi turno
+                  board.classList.add("bloqueado");
+
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+
+                  unflipCard(lastCard);
+                  unflipCard(juego.PosCartaRevelada);
+
+                  esperar();
+              }
+              lastCard = juego.PosCartaRevelada;
+
+
+          } else {
+              juego = {Estado:5}
+              finJuego(juego);
+          }
+      } 
+
+      async function esperar() {
+          //Deshabilitar el tablero
+          //for (let b of board.querySelectorAll("button")) {
+          //    b.disabled = true;
+          //}
+          console.log("esperando");
+          let json = { Nombre: nombre };
+
+          let response = await fetch("/memorama/esperando", {
+              method: "POST", body: JSON.stringify(json), headers: {
+                  "content-type": "application/json"
+              }
+          });
+
+
+          if (response.ok) {
+
+              let juego = await response.json();
+              if (juego.Estado == 4) {
+                  console.log("esperando fin");
+                  await new Promise(resolve => setTimeout(resolve, 5000));
+
+
+                  finJuego(juego);
+                  console.log("esperando fin");
+
+
+                  return;
+              }
+              player1score.innerText = juego.PuntageJugsador1;
+              player2score.innerText = juego.PuntageJugador2;
+              turno.innerText = juego.Turno;
+              if (juego.Turno == nombre) {
+                  console.log("Es mi turno");
+              }
+              else {
+                  console.log("ya no");
+
+              }
+             
+
+
+
+              flipCard(juego.PosCartaRevelada, juego.CartaRevelada);
+
+
+              if (juego.Estado == 3) {
+                  console.log("esperando fin");
+                  await new Promise(resolve => setTimeout(resolve, 5000));
+
+
+                  finJuego(juego);
+                  console.log("esperando fin");
+
+
+
+              }
+              
+
+
+
+              if (juego.Turno == nombre) {
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+
+                  unflipCard(lastCard);
+                  unflipCard(juego.PosCartaRevelada);
+                  console.log("terminado animacion");
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                  console.log("termina espera");
+                  board.classList.remove("bloqueado");
+
+                  
+              }
+              else { //no es mi turno
+                  
+                  
+                      esperar();
+
+                  
+              }
+              lastCard = juego.PosCartaRevelada;
+          }
+          else {
+              console.log("error");
+          }
+      }
+      function finJuego(juego) {
+          playerNameSection.hidden = true;
+          gameSection.hidden = true;
+
+          gameResults.hidden = false;
+          if (juego.Estado == 5) {
+              gameResuil.textContent = "Se cerro la partida por inactividad o un error de conexion"
+          } else if (juego.Estado == 4) {
+              gameResuil.textContent = "El contrincante abandono o tubo un error de conexion"
+          } else {
+
+              if (juego.PuntageJugador1 > juego.PuntageJugador2) {
+                  if (nombre == juego.Jugador1) {
+                      gameResuil.textContent = "ganaste";
+                  } else {
+                      gameResuil.textContent = "perdiste";
+                  }
+              } else if (juego.PuntageJugador2 > juego.PuntageJugador1) {
+                  if (nombre == juego.Jugador2) {
+                      gameResuil.textContent = "ganaste";
+                  } else {
+                      gameResuil.textContent = "perdiste";
+                  }
+              } else {
+                  gameResuil.textContent = "Empate";
+              }
+          }
+
+         
+
+
+
+      }
+
+  </script>
+
+</body>
+</html>
