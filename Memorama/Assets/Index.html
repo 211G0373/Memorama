@@ -161,13 +161,13 @@ h1 {
           filter: brightness(0.8);
       }
 
-    .card.placed {
-      transform: scale(1);
-      opacity: 1;
-    }
-      .card.show {
-          background-image: url(/memorama/assets/imgs/1.png);
+      .card.placed {
+          transform: scale(1);
           background-size: cover;
+          opacity: 1;
+      }
+      .turnMessage {
+          margin-top:2dvh;
       }
     #message {
       font-family: 'MiFuentePersonalizada', sans-serif;
@@ -220,7 +220,7 @@ h1 {
       <div class="board" id="board">
          
       </div>
-      <h2>
+      <h2 class="turnMessage">
           <span>Turno de </span>
           <span id="currentPlayer"></span>
       </h2>
@@ -231,7 +231,7 @@ h1 {
         <h2 id="game-result"></h2>
         <button id="restart-button">Volver a jugar</button>
 
-        <h2 id="game-status" class="status" hidden>Esperando a otro jugador...</h2>
+        <h2 id="game-status2" class="status" hidden>Esperando a otro jugador...</h2>
 
     </div>
 
@@ -244,7 +244,9 @@ h1 {
 
       const playerNameSection = document.getElementById("player-name-section");
     const gameSection = document.getElementById("game-section");
-    const gameStatus = document.getElementById("game-status");
+      const gameStatus = document.getElementById("game-status");
+      const gameStatus2 = document.getElementById("game-status2");
+
     const turnMessage = document.getElementById("turn-message");
     const board = document.getElementById("board");
       const gameResults = document.getElementById("game-results");
@@ -257,7 +259,7 @@ h1 {
     const player1score = document.getElementById("puntage1");
     const player2score = document.getElementById("puntage2");
     const turno = document.getElementById("currentPlayer");
-    let nombre, idSesion, lastCard;
+    let nombre, idSesion, lastCard, juegoIniciado=false;
 
     //animacion inicial
     function createCard(index) {
@@ -272,9 +274,11 @@ h1 {
     }
     //voltear carta
       async function flipCard(nmcard, image) {
-           let card = document.querySelector(`.card[data-pos="${nmcard}"]`);
+
+          let card = document.querySelector(`.card[data-pos="${nmcard}"]`);
+          card.classList.toggle('show');
+
           //const card = cartas[nmcard];
-         card.classList.toggle('show');
         card.style.backgroundImage = `url(/memorama/assets/imgs/rompiendo.gif)`;
       
         const audio = new Audio('/memorama/assets/rompiendo3.mp3'); // Asegúrate de que el archivo esté en la misma carpeta o pon la ruta correcta
@@ -286,14 +290,12 @@ h1 {
         const audio2 = new Audio('/memorama/assets/roto3.mp3'); 
       audio2.play();
           card.style.backgroundImage = `url(/memorama/assets/imgs/` + image + `.png)`;
-      card.classList.toggle('show');
       }
 
       //unflip cards
       async function unflipCard(nmcard) {
           let card = document.querySelector(`.card[data-pos="${nmcard}"]`);
           //const card = cartas[nmcard];
-          card.classList.toggle('show');
           card.style.backgroundImage = `url(/memorama/assets/imgs/rompiendo.gif)`;
 
           const audio = new Audio('/memorama/assets/rompiendo3.mp3'); // Asegúrate de que el archivo esté en la misma carpeta o pon la ruta correcta
@@ -306,6 +308,7 @@ h1 {
           audio2.play();
           card.style.backgroundImage = `url(/memorama/assets/stone.jpg)`;
           card.classList.toggle('show');
+
       }
 
 
@@ -329,32 +332,26 @@ h1 {
           cartas = document.querySelectorAll(".card");
           // Esperar a que termine la animación de la última carta
           await new Promise(resolve => setTimeout(resolve, 500));
+        
       }
 
     //Dar click en la carta
-    board.addEventListener('click', (event) => {
-        if (event.target.classList.contains('card') && !board.classList.contains("bloqueado")) {
 
-
-
-
-
-
-            Jugada(event.target); // Llamar a la función Jugada con la carta clickeada
-        // Cambia la imagen después de 1 segundo
-        }
-    });
 
       //inicio
 
       async function start() {
           console.log("falllandooo");
+          juegoIniciado = false
+
           if (playerNameInput.value) {
               nombre = playerNameInput.value;
               //crear el json
               let json = { Nombre: nombre };
 
               gameStatus.hidden = false;
+              gameStatus2.hidden = false;
+
               playerNameInput.disabled = true;
 
               let response = await fetch("/memorama/quierojugar", {
@@ -371,21 +368,32 @@ h1 {
                   playerNameSection.hidden = true;
                   gameResults.hidden = true;
                   gameSection.hidden = false;
-
+                  gameStatus.hidden = true;
+                  gameStatus2.hidden = true;
+                  gameStatus2.hidden = true;
                   idSesion = juego.IdSesion;
 
                   player1.innerText = juego.Jugador1;
                   player2.innerText = juego.Jugador2;
+                  player1score.innerText = juego.PuntageJugador1;
+                  player2score.innerText = juego.PuntageJugador2;
+
                   turno.innerText = juego.Turno;
 
                   if (juego.Jugador1 == nombre) {
                       player1.style.color = "darkgreen";
+                      player2.style.color = "white";
+
                   }
                   else {
                       player2.style.color = "darkgreen";
+                      player1.style.color = "white";
+
                   }
                   await startGame();
                   console.log("iniciado");
+                  juegoIniciado = true;
+
                   if (juego.Turno == nombre) {
                       board.classList.remove("bloqueado");
                   }
@@ -408,6 +416,14 @@ h1 {
 
 
 
+      board.addEventListener('click', (event) => {
+          
+          if (juegoIniciado && event.target.classList.contains('placed') && !board.classList.contains("bloqueado") && !event.target.classList.contains('show')) {
+              Jugada(event.target);
+          }
+      });
+
+
       //jugada
       async function Jugada(carta) {
           let json = { IdSesion: idSesion, PosCarta: parseInt(carta.dataset.pos), Nombre: nombre };
@@ -423,6 +439,7 @@ h1 {
               let juego = await response.json();
               player1score.innerText = juego.PuntageJugador1;
               player2score.innerText = juego.PuntageJugador2;
+
               turno.innerText = juego.Turno;
               if (juego.Turno == nombre) {
                   console.log("Es mi turno");
@@ -502,7 +519,7 @@ h1 {
 
                   return;
               }
-              player1score.innerText = juego.PuntageJugsador1;
+              player1score.innerText = juego.PuntageJugador1;
               player2score.innerText = juego.PuntageJugador2;
               turno.innerText = juego.Turno;
               if (juego.Turno == nombre) {
