@@ -228,13 +228,13 @@ namespace Memorama.Services
                                     //long polling, mientras no sea mi turno
 
 
-                                    for (int i = 0; i < 10; i++)
+                                    for (int i = 0; i < 21; i++)
                                     {
                                         if (sesion.LastTurno == lasturn && sesion.Turno == turn)
                                         {
                                             
                                             Thread.Sleep(500);
-                                            if (i == 9)
+                                            if (i == 20)
                                             {
                                                 sesion.Estado = 4;
                                             }
