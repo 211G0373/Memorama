@@ -134,7 +134,7 @@ namespace Memorama.Services
                             if (jugador != null)
                             {
                                 //Tengo el nombre: jugador.Nombre
-                                var ip = context.Request.RemoteEndPoint.ToString();
+                                var ip = context.Request.RemoteEndPoint.Address.ToString();
 
                                 //2. Verificar que el jugador no este ya jugando
 
@@ -150,14 +150,15 @@ namespace Memorama.Services
                                 else
                                 {
                                     //3. VERIFICAR SI HAY ALGUNA SESIÓN ESPERANDO JUGADOR
-                                    sesion = sesiones.FirstOrDefault(x => x.EstaCompleto == false);
+                                    sesion = sesiones.FirstOrDefault(x => x.EstaCompleto == false && x.Jugador1!=jugador.Nombre);
 
                                     if (sesion == null) //No hay sesiones disponibles, crear una
                                     {
                                         sesion = new SesionJuego()
                                         {
-                                            Id = sesiones.Count + 1,
-                                        };
+                                           
+                                            Id = sesiones.OrderBy(x => x.Id).LastOrDefault()?.Id + 1 ?? 1, //Asignar un nuevo ID
+                                        }; 
                                         sesion.AgregarJugador(jugador.Nombre, ip);
                                         sesiones.Add(sesion);
                                     }
@@ -213,9 +214,13 @@ namespace Memorama.Services
 
                             if (jugador != null)
                             {
-                                var ip = context.Request.RemoteEndPoint.ToString();
+                                var ip = context.Request.RemoteEndPoint.Address.ToString();
 
-                                SesionJuego? sesion = sesiones.FirstOrDefault(x => x.Jugador1 == jugador.Nombre || x.Jugador2 == jugador.Nombre);
+
+                                SesionJuego? sesion = sesiones.FirstOrDefault(x =>
+                               x.Jugador1 == jugador.Nombre && x.Ip1 == ip || x.Jugador2 == jugador.Nombre &&
+                               x.Ip2 == ip);
+
                                 var lasturn = sesion?.LastTurno;
                                 var turn = sesion?.Turno;
 

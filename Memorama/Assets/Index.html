@@ -166,6 +166,7 @@ h1 {
           background-size: cover;
           opacity: 1;
       }
+      
       .turnMessage {
           margin-top:2dvh;
       }
@@ -176,11 +177,20 @@ h1 {
       text-align: center;
       margin-top: 20px;
     }
-    .bloqueado .card{
-        backdrop-filter: brightness(0.5);
-    }
-      .bloqueado .card:hover {
-          cursor: none;
+      .bloqueado .card.placed {
+          filter: brightness(0.5);
+      }
+
+          .bloqueado .card.placed.show {
+              filter: brightness(1);
+          }
+
+          .bloqueado .card:hover {
+              cursor: none;
+          }
+
+      .bloqueado .card.placed.par {
+          filter: brightness(1.5);
       }
   </style>
 </head>
@@ -351,7 +361,7 @@ h1 {
 
               gameStatus.hidden = false;
               gameStatus2.hidden = false;
-
+              gameStatus.textContent = "Esperando jugador"
               playerNameInput.disabled = true;
 
               let response = await fetch("/memorama/quierojugar", {
@@ -404,11 +414,15 @@ h1 {
 
 
               }
+              else {
+                  gameStatus.textContent = "ese nombre ya esta en uso en esta pc";
+                  console.log("fallando");
+              }
 
 
           }
           else {
-              alert("Escribe el nombre del usuario para comenzar.");
+             
           }
       }
       startButton.addEventListener("click", start);
@@ -427,6 +441,7 @@ h1 {
       //jugada
       async function Jugada(carta) {
           let json = { IdSesion: idSesion, PosCarta: parseInt(carta.dataset.pos), Nombre: nombre };
+          board.classList.add("bloqueado");
 
           let response = await fetch("/memorama/jugada/", {
               method: "POST",
@@ -437,10 +452,7 @@ h1 {
           });
           if (response.ok) {
               let juego = await response.json();
-              player1score.innerText = juego.PuntageJugador1;
-              player2score.innerText = juego.PuntageJugador2;
-
-              turno.innerText = juego.Turno;
+             
               if (juego.Turno == nombre) {
                   console.log("Es mi turno");
               }
@@ -451,35 +463,69 @@ h1 {
               flipCard(juego.PosCartaRevelada, juego.CartaRevelada);
 
 
+              
+              
 
-              if (juego.Estado == 3) {
-                  console.log("esperando fin");
-                  await new Promise(resolve => setTimeout(resolve, 5000));
-
-
-                  finJuego(juego);
-                  console.log("esperando fin");
-
-
-
-              }
+            
 
               if (juego.Turno == nombre) {
+                  if (juego.Estado == 2 || juego.Estado == 3) {
+                      await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
+
+                      document.querySelector(`.card[data-pos="${lastCard}"]`).classList.add("par");
+                      document.querySelector(`.card[data-pos="${juego.PosCartaRevelada}"]`).classList.add("par");
+                      const audio2 = new Audio('/memorama/assets/par.mp3');
+                      audio2.play();
+                      await new Promise(resolve => setTimeout(resolve, 2000)); // Espera 1 segundo
+                      player1score.innerText = juego.PuntageJugador1;
+                      player2score.innerText = juego.PuntageJugador2;
+                  }
+
+
+
+                  if (juego.Estado == 3) {
+                      console.log("esperando fin");
+                      await new Promise(resolve => setTimeout(resolve, 5000));
+
+
+                      finJuego(juego);
+
+                      console.log("esperando fin");
+
+
+
+                  }
 
 
 
 
+
+                  if (juego.Estado == 2) {
+                      document.querySelector(`.card[data-pos="${lastCard}"]`).classList.remove("par");
+                      document.querySelector(`.card[data-pos="${juego.PosCartaRevelada}"]`).classList.remove("par");
+
+                  }
+                  await new Promise(resolve => setTimeout(resolve, 2000)); // Espera 1 segundo
+
+                  board.classList.remove("bloqueado");
 
               }
               else { //no es mi turno
                   board.classList.add("bloqueado");
 
+                  esperar();
+
+
                   await new Promise(resolve => setTimeout(resolve, 2000));
 
                   unflipCard(lastCard);
                   unflipCard(juego.PosCartaRevelada);
+                  await new Promise(resolve => setTimeout(resolve, 1000));
 
-                  esperar();
+                  turno.innerText = juego.Turno;
+
+                 
+
               }
               lastCard = juego.PosCartaRevelada;
 
@@ -519,9 +565,7 @@ h1 {
 
                   return;
               }
-              player1score.innerText = juego.PuntageJugador1;
-              player2score.innerText = juego.PuntageJugador2;
-              turno.innerText = juego.Turno;
+             
               if (juego.Turno == nombre) {
                   console.log("Es mi turno");
               }
@@ -536,19 +580,7 @@ h1 {
               flipCard(juego.PosCartaRevelada, juego.CartaRevelada);
 
 
-              if (juego.Estado == 3) {
-                  console.log("esperando fin");
-                  await new Promise(resolve => setTimeout(resolve, 5000));
-
-
-                  finJuego(juego);
-                  console.log("esperando fin");
-
-
-
-              }
-              
-
+            
 
 
               if (juego.Turno == nombre) {
@@ -557,16 +589,47 @@ h1 {
                   unflipCard(lastCard);
                   unflipCard(juego.PosCartaRevelada);
                   console.log("terminado animacion");
-                  await new Promise(resolve => setTimeout(resolve, 500));
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  turno.innerText = juego.Turno;
+
                   console.log("termina espera");
                   board.classList.remove("bloqueado");
 
                   
               }
               else { //no es mi turno
-                  
-                  
-                      esperar();
+                  esperar();
+                  if (juego.Estado == 2 || juego.Estado == 3) {
+                      await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
+
+                      document.querySelector(`.card[data-pos="${lastCard}"]`).classList.add("par");
+                      document.querySelector(`.card[data-pos="${juego.PosCartaRevelada}"]`).classList.add("par");
+                      const audio2 = new Audio('/memorama/assets/par.mp3');
+                      audio2.play();
+                      await new Promise(resolve => setTimeout(resolve, 2000)); // Espera 1 segundo
+                      player1score.innerText = juego.PuntageJugador1;
+                      player2score.innerText = juego.PuntageJugador2;
+                  }
+
+                  if (juego.Estado == 3) {
+                      console.log("esperando fin");
+                      await new Promise(resolve => setTimeout(resolve, 5000));
+
+
+                      finJuego(juego);
+                      console.log("esperando fin");
+
+
+
+                  }
+
+
+                  if (juego.Estado == 2) {
+                      document.querySelector(`.card[data-pos="${lastCard}"]`).classList.remove("par");
+                      document.querySelector(`.card[data-pos="${juego.PosCartaRevelada}"]`).classList.remove("par");
+
+                  }
+                      
 
                   
               }
